@@ -3,8 +3,12 @@
 const modal = document.querySelector('#modal');
 const screen = document.querySelector('.screen');
 const sections = document.querySelectorAll('.section');
+const prev = document.querySelector('#prev');
 const next = document.querySelector('#next');
 const span = document.getElementsByClassName("close")[0];
+const Mail = document.querySelector('#email');
+const Phone = document.querySelector('#phone');
+const formError = document.querySelector('#formError');
 
 const $catalog = document.querySelector('.catalog');
 const API_URL = 'https://raw.githubusercontent.com/GeekBrainsTutorial/online-store-api/master/responses';
@@ -64,6 +68,41 @@ function showSection(id) {
 
 function updateBasketItems(id) {
     basket_.updateBasketItems(id);
+}
+
+function validateForm() {
+    let errEmail = validateEmail();
+    let errPhone = validatePhone();
+    if (errEmail != "" || errPhone != "") {
+        formError.insertAdjacentHTML('beforeend', "<p>" + errPhone + "<br>" + errEmail + "</p>");
+    } else {
+        formError.insertAdjacentHTML('beforeend', "");
+    }
+}
+
+function validateEmail() {
+    let reg = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
+    let value = Mail.value;
+    if (reg.test(value) == false) {
+        Mail.classList.add("error");
+        return "Не корректный e-mail";
+    } else {
+        Mail.classList.remove("error");
+        return "";
+    }
+}
+
+function validatePhone() {
+    let reg = /^\d[\d\(\)\ -]{4,14}\d$/;
+    let valid = reg.test(phone);
+    let value = Phone.value;
+    if (reg.test(value) == false) {
+        Phone.classList.add("error");
+        return "Номер телефона введен неправильно!";
+    } else {
+        Phone.classList.remove("error");
+        return "";
+    }
 }
 
 class Api {
@@ -138,6 +177,14 @@ class GoodsList {
         }).catch((err) => {
             this.onFetchError(err)
         });
+    }
+
+    searchHandler() {
+        if (this.search === '') {
+            this.filtredGoods = this.goods;
+        }
+        const regexp = new RegExp(this.search, 'gi');
+        this.filtredGoods = this.goods.filter((good) => regexp.test(good.title));
     }
 
     onFetchSuccess(goods) {
@@ -277,7 +324,8 @@ class basketClass {
                 //получаем текущий элемент-товар
                 let outputItem = this.goods[i];
 
-                html = html + `<div id="item-${i}" class="basket-item">  
+                html = html +
+                    `<div id="item-${i}" class="basket-item">  
                         <div class="basket-item-left">
                             <p><b>Наименование: </b> ${outputItem.name}</p>
                             <p><b>Количество: </b>

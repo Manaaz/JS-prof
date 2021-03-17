@@ -17,7 +17,7 @@
 
     <!--<script src="main.js"></script>-->
 
-    <title>Pro JS. Lesson 3.</title>
+    <title>Pro JS. Lesson 4.</title>
 </head>
 
 <body>
@@ -27,6 +27,8 @@
     </div>
 
     <div class="content">
+
+        <input id="search" v-model="search" v-on:input="searchHandler">
 
         <p class="btn btn-primary" onclick="openBasket()">Корзина</p>
 
@@ -66,7 +68,34 @@
 
             </div>
         </div>
+
+        <br>
+        <hr>
+        <br>
+
+        <form id="form_id" method="post" action="">
+            <div class="mb-3">
+                <span>Your name:</span>
+                <p><input type="text" placeholder="Name"></p>
+
+                <span>Phone:</span>
+                <p><input type="text" id="phone" name="phone"></p>
+
+                <span>Email address:</span>
+                <p><input type="text" id="email" name="email"></p>
+
+                <div id="formError" aria-live="polite"></div>
+                <div id="message" class="form-text">
+                    <p>Your password must be 8-20 characters long, contain letters and numbers, and must not contain spaces, special characters, or emoji.</p>
+                </div>
+                <p>
+                    <span class="btn btn-primary" onclick="validateForm()">submit</span>
+                </p>
+            </div>
+        </form>
     </div>
+
+
 
     <script src="main.js"></script>
 
