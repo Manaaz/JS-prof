@@ -17,59 +17,54 @@
 
     <!--<script src="main.js"></script>-->
 
-    <title>Pro JS. Lesson 3.</title>
+    <title>Pro JS. Lesson 5-6.</title>
 </head>
 
 <body>
-
-    <div class="header">
-
+    <div id="app">
+        <header>
+            <input id="search" v-model="search" v-on:input="searchHandler">
+            <cart v-on:remove="removeFromCartHandler">
+                <goods-item v-for="good in cart" v-bind:title="good.title" v-bind:price="good.price" v-bind:id="good.id" />
+            </cart>
+        </header>
+        <hr>
+        <main>
+            <div class="catalog-shell"></div>
+            <div class="goods-list catalog" v-on:click="addToCartHandler">
+                <goods-item v-for="good in filtredGoods" v-bind:title="good.title" v-bind:price="good.price" v-bind:id="good.id"></goods-item>
+            </div>
+    </div>
+    </main>
     </div>
 
-    <div class="content">
+    <br>
+    <hr>
+    <br>
 
-        <p class="btn btn-primary" onclick="openBasket()">Корзина</p>
+    <form id="form_id" method="post" action="">
+        <div class="mb-3">
+            <span>Your name:</span>
+            <p><input type="text" placeholder="Name"></p>
 
-        <div id="modal" class="modal">
-            <div class="screen"></div>
-            <div class="pre-basket-shell">
-                <h1>Состав корзины</h1>
-                <div class="section">
-                    <div class="basket" id="basket_id"></div>
-                </div>
-                <h1>Адрес доставки</h1>
-                <div class="section">
-                    <p>Адрес доставки</p>
-                    <input type="text">
-                </div>
-                <h1>Комментарий</h1>
-                <div class="section">
-                    <p>Комментарий</p>
-                    <input type="text">
-                </div>
+            <span>Phone:</span>
+            <p><input type="text" id="phone" name="phone"></p>
 
-                <div class="buttons">
-                    <p class="btn btn-primary" id="prev">Назад</p>
-                    <p class="btn btn-primary" id="next">Далее</p>
-                </div>
+            <span>Email address:</span>
+            <p><input type="text" id="email" name="email"></p>
 
+            <div id="formError" aria-live="polite"></div>
+            <div id="message" class="form-text">
+                <p>Your password must be 8-20 characters long, contain letters and numbers, and must not contain spaces, special characters, or emoji.</p>
             </div>
+            <p>
+                <span class="btn btn-primary" onclick="validateForm()">submit</span>
+            </p>
         </div>
+    </form>
 
-        <div class="modalImg">
-            <span class="close">×</span>
-            <img src="" alt="" class="modal-contentImg" id="img01" />
-        </div>
-
-        <div class="catalog-shell">
-            <div class="catalog">
-
-            </div>
-        </div>
-    </div>
-
-    <script src="main.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script src="script.js"></script>
 </body>
 
 </html>
