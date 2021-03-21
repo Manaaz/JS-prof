@@ -1,119 +1,109 @@
-class Api {
-    constructor() {
-      this.url = '/goods.json';
-    }
+const API_URL = '/goods.json';
 
-    fetch(error, success) {
-      let xhr;
-    
-      if (window.XMLHttpRequest) {
-        xhr = new XMLHttpRequest();
-      } else if (window.ActiveXObject) { 
-        xhr = new ActiveXObject("Microsoft.XMLHTTP");
-      }
-    
-      xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4) {
-          if(xhr.status === 200) {
-            success(JSON.parse(xhr.responseText));
-          } else if(xhr.status > 400) {
-            error('все пропало');
-          }
+Vue.component('goods-item', { // Создание нового компонента
+    template: `
+            <div :data-id="id" class="goods-item">
+                <div class="card-img">
+                    <img src="img/catalogItem-1.jpg" class="rounded mx-auto d-block">
+                </div>
+                <h5 class="card-title">{{ title }}</h5>
+                <p class="card-text text-price">{{ price }}</p>
+            </div>`,
+    props: ['title', 'price', 'id'] // задаем параметры компонента
+})
+
+Vue.component('cart', { // создание компонента корзины
+    template: `<div>
+                <button class="cart-button" @click="openCartHandler" type="button">Корзина</button>
+                <div v-if="isVisibleCart" v-on:click="removeHandler">
+                <slot></slot>
+                </div>
+            </div>`,
+    data() { // данные компонента (Обязательно в виде метода!)
+        return {
+            isVisibleCart: false
         }
-      }
-    
-      xhr.open('GET', this.url, true);
-      xhr.send();
+    },
+    methods: {
+        openCartHandler() {
+            this.isVisibleCart = !this.isVisibleCart;
+        },
+
+        removeHandler(e) {
+            this.$emit('remove', e) // Генерируем пользовательское событие
+        }
     }
+})
 
-  
+const vue = new Vue({
+    el: "#app",
+    data: {
+        cart: [],
+        goods: [],
+        filtredGoods: [],
+        search: ''
+    },
+    methods: {
+        addToCartHandler(e) {
+            const id = e.target.closest('.goods-item').dataset.id;
+            const good = this.goods.find((item) => item.id == id);
 
-    fetchPromise() {
-      return new Promise((resolve, reject) => {
-        this.fetch(reject, resolve)
-      }) 
+            this.cart.push(good);
+        },
+
+        removeFromCartHandler(e) {
+            console.log(e)
+            const id = e.target.closest('.goods-item').dataset.id;
+            const goodIndex = this.cart.findIndex((item) => item.id == id);
+
+            this.cart.splice(goodIndex - 1, 1);
+        },
+
+        searchHandler() {
+            if (this.search === '') {
+                this.filtredGoods = this.goods;
+            }
+            const regexp = new RegExp(this.search, 'gi');
+            this.filtredGoods = this.goods.filter((good) => regexp.test(good.title));
+        },
+
+        fetch(error, success) {
+            let xhr;
+
+            if (window.XMLHttpRequest) {
+                xhr = new XMLHttpRequest();
+            } else if (window.ActiveXObject) {
+                xhr = new ActiveXObject("Microsoft.XMLHTTP");
+            }
+
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        success(JSON.parse(xhr.responseText));
+                    } else if (xhr.status > 400) {
+                        error('все пропало');
+                    }
+                }
+            }
+
+            xhr.open('GET', API_URL, true);
+            xhr.send();
+        },
+
+        fetchPromise() {
+            return new Promise((resolve, reject) => {
+                this.fetch(reject, resolve)
+            })
+        }
+    },
+    mounted() {
+        this.fetchPromise()
+            .then(data => {
+                this.goods = data;
+                this.filtredGoods = data;
+            })
+            .catch(err => {
+                console.log(err);
+            })
     }
-}
-
-class GoodsItem {
-    constructor(title, price) {
-      this.title = title;
-      this.price = price;
-    }
-
-    getHtml() {
-      return `<div class="goods-item"><h3>${this.title}</h3><p>${this.price}</p></div>`;
-    }
-}
-
-class Header {
-  constructor() {
-    this.$container = document.querySelector('header');
-    this.$button = this.$container.querySelector('.cart-button');
-    this.$search = this.$container.querySelector('#search');
-  }
-
-  setSearchHandler(callback) {
-    this.$search.addEventListener('input', callback);
-  }
-
-  setButtonHandler(callback) {
-    this.$button.addEventListener('click', callback);
-  }
-}
-
-class GoodsList {
-    constructor() {
-      this.api = new Api();
-      this.header = new Header();
-      this.$goodsList = document.querySelector('.goods-list');
-      this.goods = [];
-      this.filteredGoods = [];
-
-      //this.api.fetch(this.onFetchError.bind(this), this.onFetchSuccess.bind(this));
-
-      this.header.setSearchHandler((evt) => {
-        this.search(evt.target.value);
-      })
-
-      const fetch = this.api.fetchPromise();
-
-      fetch.then((data) => { this.onFetchSuccess(data) })
-        .catch((err) => { this.onFetchError(err) });
-
-      console.log(fetch);
-    }
-
-    search(str) {
-      if(str === '') {
-        this.filteredGoods = this.goods;
-      }
-      const regexp = new RegExp(str, 'gi');
-      this.filteredGoods = this.goods.filter((good) => regexp.test(good.title));
-      this.render();
-    }
-
-    onFetchSuccess(data) {
-      this.goods = data.map(({title, price}) => new GoodsItem(title, price));
-      this.filteredGoods = this.goods;
-      this.render();
-    }
-
-    onFetchError(err) {
-      this.$goodsList.insertAdjacentHTML('beforeend', `<h3>${err}</h3>`);
-    }
-
-    render() {
-      this.$goodsList.textContent = '';
-      this.filteredGoods.forEach((good) => {
-          this.$goodsList.insertAdjacentHTML('beforeend', good.getHtml());
-      })
-    }
-}
-
-function openCart () {
-  console.log('cart');
-}
-
-
-const goodsList = new GoodsList();
+})
